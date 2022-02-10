@@ -9,40 +9,44 @@ import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
-type School struct {
-	Id   int64  `orm:"auto"`
-	Name string `orm:"size(128)" valid:"Required"`
+type Student struct {
+	Id            int64  `orm:"auto"`
+	StudentNumber string `orm:"size(128)"`
+	Password      string `orm:"size(128)"`
+	Email         string `orm:"size(128)"`
+	EntranceYear  int
+	Rand          int
 }
 
 func init() {
-	orm.RegisterModel(new(School))
+	orm.RegisterModel(new(Student))
 }
 
-// AddSchool insert a new School into database and returns
+// AddStudent insert a new Student into database and returns
 // last inserted Id on success.
-func AddSchool(m *School) (id int64, err error) {
+func AddStudent(m *Student) (id int64, err error) {
 	o := orm.NewOrm()
 	id, err = o.Insert(m)
 	return
 }
 
-// GetSchoolById retrieves School by Id. Returns error if
+// GetStudentById retrieves Student by Id. Returns error if
 // Id doesn't exist
-func GetSchoolById(id int64) (v *School, err error) {
+func GetStudentById(id int64) (v *Student, err error) {
 	o := orm.NewOrm()
-	v = &School{Id: id}
-	if err = o.QueryTable(new(School)).Filter("Id", id).RelatedSel().One(v); err == nil {
+	v = &Student{Id: id}
+	if err = o.QueryTable(new(Student)).Filter("Id", id).RelatedSel().One(v); err == nil {
 		return v, nil
 	}
 	return nil, err
 }
 
-// GetAllSchool retrieves all School matches certain condition. Returns empty list if
+// GetAllStudent retrieves all Student matches certain condition. Returns empty list if
 // no records exist
-func GetAllSchool(query map[string]string, fields []string, sortby []string, order []string,
+func GetAllStudent(query map[string]string, fields []string, sortby []string, order []string,
 	offset int64, limit int64) (ml []interface{}, err error) {
 	o := orm.NewOrm()
-	qs := o.QueryTable(new(School))
+	qs := o.QueryTable(new(Student))
 	// query k=v
 	for k, v := range query {
 		// rewrite dot-notation to Object__Attribute
@@ -88,7 +92,7 @@ func GetAllSchool(query map[string]string, fields []string, sortby []string, ord
 		}
 	}
 
-	var l []School
+	var l []Student
 	qs = qs.OrderBy(sortFields...).RelatedSel()
 	if _, err = qs.Limit(limit, offset).All(&l, fields...); err == nil {
 		if len(fields) == 0 {
@@ -111,11 +115,11 @@ func GetAllSchool(query map[string]string, fields []string, sortby []string, ord
 	return nil, err
 }
 
-// UpdateSchoolById UpdateSchool updates School by Id and returns error if
+// UpdateStudent updates Student by Id and returns error if
 // the record to be updated doesn't exist
-func UpdateSchoolById(m *School) (err error) {
+func UpdateStudentById(m *Student) (err error) {
 	o := orm.NewOrm()
-	v := School{Id: m.Id}
+	v := Student{Id: m.Id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
@@ -126,15 +130,15 @@ func UpdateSchoolById(m *School) (err error) {
 	return
 }
 
-// DeleteSchool deletes School by Id and returns error if
+// DeleteStudent deletes Student by Id and returns error if
 // the record to be deleted doesn't exist
-func DeleteSchool(id int64) (err error) {
+func DeleteStudent(id int64) (err error) {
 	o := orm.NewOrm()
-	v := School{Id: id}
+	v := Student{Id: id}
 	// ascertain id exists in the database
 	if err = o.Read(&v); err == nil {
 		var num int64
-		if num, err = o.Delete(&School{Id: id}); err == nil {
+		if num, err = o.Delete(&Student{Id: id}); err == nil {
 			fmt.Println("Number of records deleted in database:", num)
 		}
 	}

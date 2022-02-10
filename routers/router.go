@@ -9,20 +9,15 @@ package routers
 
 import (
 	"Campus-Server/controllers"
-
 	beego "github.com/beego/beego/v2/server/web"
 )
 
 func init() {
-	ns := beego.NewNamespace("/v1",
-		beego.NSNamespace("/object",
+	ns := beego.NewNamespace("/api",
+
+		beego.NSNamespace("/school",
 			beego.NSInclude(
-				&controllers.ObjectController{},
-			),
-		),
-		beego.NSNamespace("/user",
-			beego.NSInclude(
-				&controllers.UserController{},
+				&controllers.SchoolController{},
 			),
 		),
 	)

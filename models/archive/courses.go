@@ -1,11 +1,11 @@
-package models
+package archive
 
 import (
 	"github.com/beego/beego/v2/client/orm"
 )
 
 type Course struct {
-	Id            int    `orm:"auto"`
+	Id            int    `orm:"column(id);pk;auto"`
 	Name          string `valid:"Required"`
 	Code          int    `valid:"Required"`
 	Credit        int    `valid:"Required"`
@@ -16,7 +16,7 @@ type Course struct {
 }
 
 type CourseGroup struct {
-	Id          int        `orm:"auto"`
+	Id          int        `orm:"column(id);pk;auto"`
 	Professor   *Professor `orm:"rel(fk)"`
 	Course      *Course    `orm:"rel(fk)"`
 	GroupNumber int        `valid:"Required"`
@@ -29,13 +29,13 @@ type CourseGroup struct {
 }
 
 type CourseRequisites struct {
-	Id         int     `orm:"auto"`
+	Id         int     `orm:"column(id);pk;auto"`
 	Course     *Course `orm:"rel(fk)"`
 	Requisites *Course `orm:"rel(fk)"`
 }
 
 type Schedule struct {
-	Id          int           `orm:"auto"`
+	Id          int           `orm:"column(id);pk;auto"`
 	Start       orm.TimeField `valid:"Required"`
 	End         orm.TimeField `valid:"Required"`
 	Day         string        `valid:"Required"`
