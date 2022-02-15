@@ -4,17 +4,15 @@ import (
 	"backend/config"
 	"backend/controllers"
 	"backend/models"
-	"fmt"
 	"log"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
 )
 
 func main() {
 	config.Init()
-	fmt.Println("Going to initialize Database...")
+	log.Println("Going to initialize Database...")
 
 	DB := models.InitDB()
 	controllers.DB = DB
