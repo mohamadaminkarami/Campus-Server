@@ -1,0 +1,32 @@
+-Campus
+    - School
+        id, name;
+
+    - User(Student):
+        studentNumber, password, email, entranceYear, takeCoursesTime, school(School F.K);
+
+    - Cource:
+        id, credit, school(School F.K);
+
+    - GroupCource:
+        id, professor(Professor F.k), cource(Cource F.K), groupNumber, year, term, day, start, end, detail; 
+
+    - Professor:
+        id, name, bio;
+
+    - PassedCources:
+        user(User F.k), Cource(GroupCource F.K), isPassed;
+
+    - Plan:
+        user(User F.k), isMainPlan ,credits;
+
+    - PlanGroupCources:
+        plan(Plan F.k), groupCource(GroupCource F.K);
+
+    - Comment:
+        professor(Professor F.K), user(User F.K), isAnonymous, text;
+
+    - CommentVotes:
+        comment(Comment F.K), user(User F.K), isUpVote;
+
+     
