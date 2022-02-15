@@ -38,5 +38,9 @@ func main() {
 	authRouter := r.Group("/auth")
 	authRouter.POST("/signup", Singup)
 	authRouter.POST("/login", Login)
+
+	profileRouter := r.Group("/profile")
+	profileRouter.Use(JWTAuthenticator())
+	profileRouter.GET("/", GetProfile)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
