@@ -13,8 +13,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var jwtKey = []byte(config.Get("JWT_SECRET"))
-
 type Claims struct {
 	StudentNumber string `json:"studentNumber"`
 	jwt.StandardClaims
@@ -53,6 +51,7 @@ func getToken(studentNumber string) (string, error) {
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	// Create the JWT string
+	jwtKey := []byte(config.Get("JWT_SECRET"))
 	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		return "", err
@@ -95,7 +94,7 @@ func extractToken(c *gin.Context) string {
 
 func extractUserInfo(c *gin.Context) (string, error) {
 	tokenString := extractToken(c)
-	log.Println("token string:", tokenString)
+	jwtKey := []byte(config.Get("JWT_SECRET"))
 	var claims Claims
 	_, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
