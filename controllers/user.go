@@ -1,18 +1,19 @@
 package controllers
 
 import (
+	"backend/config"
 	"backend/forms"
 	"backend/models"
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 	"time"
+
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
-var jwtKey = []byte(os.Getenv("JWT_SECRET"))
+var jwtKey = []byte(config.Get("JWT_SECRET"))
 
 type Claims struct {
 	StudentNumber string `json:"studentNumber"`
