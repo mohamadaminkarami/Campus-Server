@@ -2,7 +2,7 @@ package main
 
 import (
 	"backend/controllers"
-	"backend/src"
+	. "backend/src"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -19,16 +19,16 @@ func main() {
 	fmt.Println("Going to initialize Database...")
 
 	var db gorm.DB
-	db = src.InitDB()
+	db = InitDB()
 	controllers.DB = db
-	// result := db.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398})
-	// log.Println(result)
-	var user src.User
+	result := db.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398})
+	log.Println(result)
+	var user User
 	db.First(&user, "student_number = ?", "98101244")
 	log.Println("DB find: ", user.StudentNumber, user.Password)
 
 	r := gin.Default()
-	r.GET("/ping", src.Pong)
+	r.GET("/ping", Pong)
 
 	schoolRouter := r.Group("/schools")
 	schoolRouter.POST("/", controllers.CreateSchool)
