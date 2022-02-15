@@ -4,9 +4,12 @@ import (
 	"backend/controllers"
 	. "backend/src"
 	"fmt"
+	"log"
+	"net/http"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"log"
 )
 
 func main() {
@@ -28,6 +31,13 @@ func main() {
 
 	r := gin.Default()
 	r.GET("/ping", Pong)
+	
+	config := cors.DefaultConfig()
+	config.AllowCredentials = true
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	r.Use(cors.New(config))
 
 	schoolRouter := r.Group("/schools")
 	schoolRouter.POST("/", controllers.CreateSchool)
