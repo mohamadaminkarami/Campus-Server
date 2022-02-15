@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
-	"gorm.io/gorm"
 	"log"
 )
 
@@ -18,13 +17,13 @@ func main() {
 
 	fmt.Println("Going to initialize Database...")
 
-	var db gorm.DB
-	db = InitDB()
-	controllers.DB = db
-	result := db.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398})
+	DB = InitDB()
+	controllers.DB = DB
+	DB.Create(&School{Name: "CE"})
+	result := DB.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398, SchoolId: 1})
 	log.Println(result)
 	var user User
-	db.First(&user, "student_number = ?", "98101244")
+	DB.First(&user, "student_number = ?", "98101244")
 	log.Println("DB find: ", user.StudentNumber, user.Password)
 
 	r := gin.Default()
@@ -36,5 +35,7 @@ func main() {
 	schoolRouter.DELETE("/:id", controllers.DeleteSchool)
 	schoolRouter.GET("/", controllers.GetAllSchools)
 
+	authRouter := r.Group("/auth")
+	authRouter.POST("/signup", Singup)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

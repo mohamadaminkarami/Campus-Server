@@ -1,11 +1,12 @@
 package src
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"golang.org/x/crypto/bcrypt"
 	"log"
 	"os"
+
+	"golang.org/x/crypto/bcrypt"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type User struct {
@@ -15,6 +16,7 @@ type User struct {
 	Email         string
 	EntranceYear  int
 	Rand          int
+	SchoolId      int `gorm:"foreignKey:SchoolRefer;constraint:OnUpdate:SET NULL,OnDelete:SET NULL;"`
 }
 
 func (u *User) BeforeSave(tx *gorm.DB) (err error) {
@@ -22,7 +24,7 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 	if u.Password != "" {
 		hash, err := HashPassword(u.Password)
 		if err != nil {
-		   return nil
+			return nil
 		}
 		tx.Statement.SetColumn("Password", hash)
 	}
@@ -30,13 +32,13 @@ func (u *User) BeforeSave(tx *gorm.DB) (err error) {
 }
 
 func HashPassword(password string) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
-    return string(bytes), err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 type School struct {
@@ -44,6 +46,8 @@ type School struct {
 	Name string `gorm:"unique;not null"`
 }
 
+var DB gorm.DB
+// should be accessible anywhere
 func InitDB() gorm.DB {
 	dsn := "host=" + os.Getenv("POSTGRES_HOST") +
 		" user=" + os.Getenv("POSTGRES_USER") +
