@@ -1,23 +1,40 @@
 package main
 
 import (
-	_ "Campus-Server/routers"
-	"github.com/beego/beego/v2/client/orm"
-	_ "github.com/lib/pq"
-
-	beego "github.com/beego/beego/v2/server/web"
+	"backend/controllers"
+	"backend/src"
+	"fmt"
+	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
+	"gorm.io/gorm"
+	"log"
 )
 
 func main() {
-	sqlconn, _ := beego.AppConfig.String("sqlconn")
-	err := orm.RegisterDataBase("default", "postgres", sqlconn)
+	err := godotenv.Load()
 	if err != nil {
-		panic(err)
+		log.Fatal("Error loading .env file")
 	}
 
-	if beego.BConfig.RunMode == "dev" {
-		beego.BConfig.WebConfig.DirectoryIndex = true
-		beego.BConfig.WebConfig.StaticDir["/swagger"] = "swagger"
-	}
-	beego.Run()
+	fmt.Println("Going to initialize Database...")
+
+	var db gorm.DB
+	db = src.InitDB()
+	controllers.DB = db
+	// result := db.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398})
+	// log.Println(result)
+	var user src.User
+	db.First(&user, "student_number = ?", "98101244")
+	log.Println("DB find: ", user.StudentNumber, user.Password)
+
+	r := gin.Default()
+	r.GET("/ping", src.Pong)
+
+	schoolRouter := r.Group("/schools")
+	schoolRouter.POST("/", controllers.CreateSchool)
+	schoolRouter.PUT("/:id", controllers.UpdateSchool)
+	schoolRouter.DELETE("/:id", controllers.DeleteSchool)
+	schoolRouter.GET("/", controllers.GetAllSchools)
+
+	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }

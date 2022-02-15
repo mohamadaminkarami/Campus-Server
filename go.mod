@@ -1,10 +1,10 @@
-module Campus-Server
+module backend
 
-go 1.13
-
-require github.com/beego/beego/v2 v2.0.1
+go 1.17
 
 require (
-	github.com/lib/pq v1.0.0
-	github.com/smartystreets/goconvey v1.6.4
+	github.com/gin-gonic/gin v1.7.7
+	github.com/joho/godotenv v1.4.0
+	gorm.io/driver/postgres v1.2.3
+	gorm.io/gorm v1.22.5
 )
