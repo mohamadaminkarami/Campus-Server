@@ -1,11 +1,11 @@
 package main
 
 import (
+	"backend/config"
 	"backend/controllers"
-	. "backend/src"
+	"backend/models"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -13,25 +13,13 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
+	config.Init()
 	fmt.Println("Going to initialize Database...")
 
-	DB = InitDB()
+	DB := models.InitDB()
 	controllers.DB = DB
-	DB.Create(&School{Name: "CE"})
-	result := DB.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398, SchoolId: 1})
-	log.Println(result)
-	var user User
-	DB.First(&user, "student_number = ?", "98101244")
-	log.Println("DB find: ", user.StudentNumber, user.Password)
-
 	r := gin.Default()
-	r.GET("/ping", Pong)
-	
+
 	config := cors.DefaultConfig()
 	config.AllowCredentials = true
 	config.AllowAllOrigins = true
@@ -46,11 +34,11 @@ func main() {
 	schoolRouter.GET("/", controllers.GetAllSchools)
 
 	authRouter := r.Group("/auth")
-	authRouter.POST("/signup", Singup)
-	authRouter.POST("/login", Login)
+	authRouter.POST("/signup", controllers.Singup)
+	authRouter.POST("/login", controllers.Login)
 
 	profileRouter := r.Group("/profile")
-	profileRouter.Use(JWTAuthenticator())
-	profileRouter.GET("/", GetProfile)
+	profileRouter.Use(controllers.JWTAuthenticator())
+	profileRouter.GET("/", controllers.GetProfile)
 	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
