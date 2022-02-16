@@ -1,12 +1,12 @@
 package controllers
 
 import (
-	"backend/src"
+	"backend/models"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
 
-func CourseToJSON(course src.Course) map[string]interface{} {
+func CourseToJSON(course models.Course) map[string]interface{} {
 	return gin.H{
 		"ID":            course.ID,
 		"name":          course.Name,
@@ -20,13 +20,13 @@ func CourseToJSON(course src.Course) map[string]interface{} {
 }
 
 func CreateCourse(c *gin.Context) {
-	var course src.Course
+	var course models.Course
 	if err := c.ShouldBindJSON(&course); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"Error": err})
 		return
 	}
 
-	var school src.School
+	var school models.School
 	if object := DB.First(&school, course.SchoolId); object.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"Error": "School not found"})
 		return
@@ -37,7 +37,7 @@ func CreateCourse(c *gin.Context) {
 }
 
 func GetAllCourses(c *gin.Context) {
-	var courses []src.Course
+	var courses []models.Course
 	DB.Preload("Prerequisites").Preload("Corequisites").Find(&courses)
 	var response []map[string]interface{}
 
@@ -48,8 +48,8 @@ func GetAllCourses(c *gin.Context) {
 }
 
 func UpdateCourse(c *gin.Context) {
-	var newCourse src.Course
-	var course src.Course
+	var newCourse models.Course
+	var course models.Course
 	if err := c.ShouldBindJSON(&newCourse); err != nil {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
 		return
@@ -61,9 +61,9 @@ func UpdateCourse(c *gin.Context) {
 	if object.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
 	} else {
-		var prerequisites []src.Course
+		var prerequisites []models.Course
 		for _, pre := range newCourse.Prerequisites {
-			var prerequisite src.Course
+			var prerequisite models.Course
 			if pObject := DB.First(&prerequisite, pre.ID); pObject.Error != nil {
 				c.JSON(http.StatusNotFound, gin.H{"Error": "Prerequisite not found"})
 				return
@@ -73,9 +73,9 @@ func UpdateCourse(c *gin.Context) {
 		}
 		DB.Model(&course).Association("Prerequisites").Replace(prerequisites)
 
-		var corequisites []src.Course
+		var corequisites []models.Course
 		for _, co := range newCourse.Corequisites {
-			var corequisite src.Course
+			var corequisite models.Course
 			if cObject := DB.First(&corequisite, co.ID); cObject.Error != nil {
 				c.JSON(http.StatusNotFound, gin.H{"Error": "Corequisite not found"})
 				return
@@ -92,7 +92,7 @@ func UpdateCourse(c *gin.Context) {
 		object.Update("Credit", newCourse.Credit)
 		object.Update("Syllabus", newCourse.Syllabus)
 
-		var school src.School
+		var school models.School
 		if sObject := DB.First(&school, course.SchoolId); sObject.Error != nil {
 			c.JSON(http.StatusNotFound, gin.H{"Error": "School not found"})
 			return
@@ -106,7 +106,7 @@ func UpdateCourse(c *gin.Context) {
 
 func DeleteCourse(c *gin.Context) {
 	courseId := c.Param("id")
-	var course src.Course
+	var course models.Course
 	object := DB.First(&course, courseId)
 
 	if object.Error != nil {
