@@ -20,6 +20,18 @@ type School struct {
 	Name string `gorm:"unique;not null"`
 }
 
+type Course struct {
+	gorm.Model
+	Name          string `gorm:"not null"`
+	Code          int    `gorm:"unique;not null"`
+	Credit        int    `gorm:"not null"`
+	Syllabus      string
+	SchoolId      int
+	School        School
+	Prerequisites []Course `gorm:"many2many:course_prerequisites;"`
+	Corequisites  []Course `gorm:"many2many:course_corequisites;"`
+}
+
 func InitDB() gorm.DB {
 	dsn := "host=" + os.Getenv("POSTGRES_HOST") +
 		" user=" + os.Getenv("POSTGRES_USER") +
@@ -34,6 +46,9 @@ func InitDB() gorm.DB {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&User{}, &School{})
+	err = db.AutoMigrate(&User{}, &School{}, &Course{})
+	if err != nil {
+		panic(err)
+	}
 	return *db
 }

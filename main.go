@@ -36,5 +36,14 @@ func main() {
 	schoolRouter.DELETE("/:id", controllers.DeleteSchool)
 	schoolRouter.GET("/", controllers.GetAllSchools)
 
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+	courseRouter := r.Group("/courses")
+	courseRouter.POST("/", controllers.CreateCourse)
+	courseRouter.PUT("/:id", controllers.UpdateCourse)
+	courseRouter.DELETE("/:id", controllers.DeleteCourse)
+	courseRouter.GET("/", controllers.GetAllCourses)
+
+	err = r.Run()
+	if err != nil {
+		panic(err)
+	} // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
