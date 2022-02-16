@@ -18,17 +18,14 @@ func main() {
 	controllers.DB = DB
 	r := gin.Default()
 
-	config := cors.DefaultConfig()
-	config.AllowCredentials = true
-	config.AllowAllOrigins = true
-	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
-	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
-	r.Use(cors.New(config))
+	conf := cors.DefaultConfig()
+	conf.AllowCredentials = true
+	conf.AllowAllOrigins = true
+	conf.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	conf.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	r.Use(cors.New(conf))
 
 	schoolRouter := r.Group("/schools")
-	schoolRouter.POST("/", controllers.CreateSchool)
-	schoolRouter.PUT("/:id", controllers.UpdateSchool)
-	schoolRouter.DELETE("/:id", controllers.DeleteSchool)
 	schoolRouter.GET("/", controllers.GetAllSchools)
 
 	authRouter := r.Group("/auth")
@@ -40,11 +37,9 @@ func main() {
 	profileRouter.GET("/", controllers.GetProfile)
 	profileRouter.PUT("/", controllers.UpdateProfile)
 
-	courseRouter := r.Group("/courses")
-	courseRouter.POST("/", controllers.CreateCourse)
-	courseRouter.PUT("/:id", controllers.UpdateCourse)
-	courseRouter.DELETE("/:id", controllers.DeleteCourse)
-	courseRouter.GET("/", controllers.GetAllCourses)
+	courseGroupRouter := r.Group("/schools")
+	courseGroupRouter.Use(controllers.JWTAuthenticator())
+	courseGroupRouter.GET("/course-groups", controllers.GetAllSchoolCourses)
 
 	err := r.Run()
 	if err != nil {

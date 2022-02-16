@@ -7,7 +7,7 @@ import (
 )
 
 func SchoolToJSON(school models.School) map[string]interface{} {
-	return gin.H{"ID": school.ID, "name": school.Name}
+	return gin.H{"id": school.ID, "name": school.Name}
 }
 
 func GetSchoolCourseGroups(school models.School) []map[string]interface{} {
@@ -47,13 +47,24 @@ func CreateSchool(c *gin.Context) {
 	c.JSON(http.StatusOK, SchoolToJSON(School))
 }
 
-func GetAllSchools(c *gin.Context) {
+func GetAllSchoolCourses(c *gin.Context) {
 	var schools []models.School
 	DB.Find(&schools)
 	var response []map[string]interface{}
 
 	for _, u := range schools {
 		response = append(response, SchoolCoursesToJSON(u))
+	}
+	c.JSON(http.StatusOK, gin.H{"result": response})
+}
+
+func GetAllSchools(c *gin.Context) {
+	var schools []models.School
+	DB.Find(&schools)
+	var response []map[string]interface{}
+
+	for _, u := range schools {
+		response = append(response, SchoolToJSON(u))
 	}
 	c.JSON(http.StatusOK, gin.H{"result": response})
 }
