@@ -27,13 +27,14 @@ type CourseGroup struct {
 	Capacity    int `gorm:"not null"`
 	ExamDate    time.Time
 	Detail      string
+	Schedule    []Schedule
 }
 
 type Schedule struct {
 	gorm.Model
-	Start         time.Time `gorm:"not null"`
-	End           time.Time `gorm:"not null"`
-	Day           int       `gorm:"not null"`
+	Start         float64 `gorm:"not null"`
+	End           float64 `gorm:"not null"`
+	Day           int     `gorm:"not null"`
 	CourseGroupId int
 	CourseGroup   CourseGroup
 }

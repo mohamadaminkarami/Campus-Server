@@ -10,6 +10,32 @@ func SchoolToJSON(school models.School) map[string]interface{} {
 	return gin.H{"ID": school.ID, "name": school.Name}
 }
 
+func GetSchoolCourseGroups(school models.School) []map[string]interface{} {
+	var groups []models.CourseGroup
+	DB.Preload("Schedule").Find(&groups)
+
+	var courseGroups []map[string]interface{}
+	for _, u := range groups {
+		var course models.Course
+		DB.First(&course, u.CourseId)
+		if course.SchoolId == int(school.ID) {
+			courseGroups = append(courseGroups, CourseGroupToJSON(u))
+		}
+	}
+	if courseGroups == nil {
+		return []map[string]interface{}{}
+	}
+	return courseGroups
+}
+
+func SchoolCoursesToJSON(school models.School) map[string]interface{} {
+	return gin.H{
+		"schoolId":     school.ID,
+		"schoolName":   school.Name,
+		"courseGroups": GetSchoolCourseGroups(school),
+	}
+}
+
 func CreateSchool(c *gin.Context) {
 	var School models.School
 	if err := c.ShouldBindJSON(&School); err != nil {
@@ -27,9 +53,9 @@ func GetAllSchools(c *gin.Context) {
 	var response []map[string]interface{}
 
 	for _, u := range schools {
-		response = append(response, SchoolToJSON(u))
+		response = append(response, SchoolCoursesToJSON(u))
 	}
-	c.JSON(http.StatusOK, response)
+	c.JSON(http.StatusOK, gin.H{"result": response})
 }
 
 func UpdateSchool(c *gin.Context) {
