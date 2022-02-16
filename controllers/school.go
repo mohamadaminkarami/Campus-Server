@@ -1,22 +1,19 @@
 package controllers
 
 import (
-	"backend/src"
+	"backend/models"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
 )
 
-var DB gorm.DB
-
-func SchoolToJSON(school src.School) map[string]interface{} {
+func SchoolToJSON(school models.School) map[string]interface{} {
 	return gin.H{"ID": school.ID, "name": school.Name}
 }
 
 func CreateSchool(c *gin.Context) {
-	var School src.School
+	var School models.School
 	if err := c.ShouldBindJSON(&School); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"Error": err})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err})
 		return
 	}
 
@@ -25,7 +22,7 @@ func CreateSchool(c *gin.Context) {
 }
 
 func GetAllSchools(c *gin.Context) {
-	var schools []src.School
+	var schools []models.School
 	DB.Find(&schools)
 	var response []map[string]interface{}
 
@@ -36,10 +33,10 @@ func GetAllSchools(c *gin.Context) {
 }
 
 func UpdateSchool(c *gin.Context) {
-	var newSchool src.School
-	var school src.School
+	var newSchool models.School
+	var school models.School
 	if err := c.ShouldBindJSON(&newSchool); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"Result": "Bad Parameter"})
+		c.JSON(http.StatusUnprocessableEntity, gin.H{"message": "Bad Parameter"})
 		return
 	}
 
@@ -47,7 +44,7 @@ func UpdateSchool(c *gin.Context) {
 	object := DB.First(&school, schoolId)
 
 	if object.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
 	} else {
 		if newSchool.Name != "" {
 			object.Update("Name", newSchool.Name)
@@ -58,13 +55,13 @@ func UpdateSchool(c *gin.Context) {
 
 func DeleteSchool(c *gin.Context) {
 	schoolId := c.Param("id")
-	var school src.School
+	var school models.School
 	object := DB.First(&school, schoolId)
 
 	if object.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"Error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
 	} else {
 		DB.Delete(&school, schoolId)
-		c.JSON(http.StatusOK, gin.H{"Success": "Item deleted"})
+		c.JSON(http.StatusOK, gin.H{"message": "Item deleted"})
 	}
 }

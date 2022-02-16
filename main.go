@@ -1,34 +1,29 @@
 package main
 
 import (
+	"backend/config"
 	"backend/controllers"
-	"backend/src"
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"gorm.io/gorm"
+	"backend/models"
 	"log"
+
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	config.Init()
+	log.Println("Going to initialize Database...")
 
-	fmt.Println("Going to initialize Database...")
-
-	var db gorm.DB
-	db = src.InitDB()
-	controllers.DB = db
-	// result := db.Create(&User{StudentNumber: "98101244", Password: "password", Email: "masihbr@gmail.com", EntranceYear: 1398})
-	// log.Println(result)
-	var user src.User
-	db.First(&user, "student_number = ?", "98101244")
-	log.Println("DB find: ", user.StudentNumber, user.Password)
-
+	DB := models.InitDB()
+	controllers.DB = DB
 	r := gin.Default()
-	r.GET("/ping", src.Pong)
+
+	config := cors.DefaultConfig()
+	config.AllowCredentials = true
+	config.AllowAllOrigins = true
+	config.AllowMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
+	config.AllowHeaders = []string{"Origin", "Content-Length", "Content-Type", "Authorization"}
+	r.Use(cors.New(config))
 
 	schoolRouter := r.Group("/schools")
 	schoolRouter.POST("/", controllers.CreateSchool)
@@ -36,13 +31,21 @@ func main() {
 	schoolRouter.DELETE("/:id", controllers.DeleteSchool)
 	schoolRouter.GET("/", controllers.GetAllSchools)
 
+	authRouter := r.Group("/auth")
+	authRouter.POST("/signup", controllers.Singup)
+	authRouter.POST("/login", controllers.Login)
+
+	profileRouter := r.Group("/profile")
+	profileRouter.Use(controllers.JWTAuthenticator())
+	profileRouter.GET("/", controllers.GetProfile)
+
 	courseRouter := r.Group("/courses")
 	courseRouter.POST("/", controllers.CreateCourse)
 	courseRouter.PUT("/:id", controllers.UpdateCourse)
 	courseRouter.DELETE("/:id", controllers.DeleteCourse)
 	courseRouter.GET("/", controllers.GetAllCourses)
 
-	err = r.Run()
+	err := r.Run()
 	if err != nil {
 		panic(err)
 	} // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
