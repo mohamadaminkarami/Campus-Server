@@ -24,6 +24,7 @@ func GetProfile(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, UserToJson(user))
 }
+
 func getUpdateProfileOmitList(data forms.UpdateUserData) ([]string) {
 	omitList := []string{"StudentNumber"}
 	for key, element := range structs.Map(data) {
@@ -33,6 +34,7 @@ func getUpdateProfileOmitList(data forms.UpdateUserData) ([]string) {
     }
 	return omitList	
 }
+
 func UpdateProfile(c *gin.Context) {
 	user, err := GetUserByToken(c)
 	if err != nil {
