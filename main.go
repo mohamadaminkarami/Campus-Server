@@ -38,5 +38,15 @@ func main() {
 	profileRouter := r.Group("/profile")
 	profileRouter.Use(controllers.JWTAuthenticator())
 	profileRouter.GET("/", controllers.GetProfile)
-	r.Run() // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
+
+	courseRouter := r.Group("/courses")
+	courseRouter.POST("/", controllers.CreateCourse)
+	courseRouter.PUT("/:id", controllers.UpdateCourse)
+	courseRouter.DELETE("/:id", controllers.DeleteCourse)
+	courseRouter.GET("/", controllers.GetAllCourses)
+
+	err := r.Run()
+	if err != nil {
+		panic(err)
+	} // listen and serve on 0.0.0.0:8080 (for windows "localhost:8080")
 }
