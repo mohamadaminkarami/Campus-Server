@@ -21,6 +21,6 @@ func InitDB() gorm.DB {
 	}
 
 	// Migrate the schema
-	db.AutoMigrate(&User{}, &School{})
+	db.AutoMigrate(&User{}, &School{}, &Course{}, &Professor{}, &CourseGroup{}, &Schedule{})
 	return *db
 }
