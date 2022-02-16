@@ -4,13 +4,13 @@ import (
 	"backend/config"
 	"backend/forms"
 	"backend/models"
+	"fmt"
+	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
 	"strings"
 	"time"
-
-	"github.com/dgrijalva/jwt-go"
-	"github.com/gin-gonic/gin"
 )
 
 type Claims struct {
@@ -30,7 +30,13 @@ func Singup(c *gin.Context) {
 		EntranceYear: data.EntranceYear,
 		SchoolId:     data.SchoolId}
 	DB.Create(&user)
-	c.JSON(http.StatusOK, gin.H{"message": "user created successfully"})
+	token, err := getToken(user.StudentNumber)
+	if err != nil {
+		log.Println("err", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "issue in token creation"})
+		return
+	}
+	c.JSON(http.StatusBadRequest, gin.H{"token": token, "message": "user created successfully"})
 }
 
 func findUser(studentNumber string) (models.User, error) {
@@ -80,7 +86,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "issue in token creation"})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"access": token})
+	c.JSON(http.StatusBadRequest, gin.H{"token": token, "message": "user logged in successfully"})
 }
 
 func extractToken(c *gin.Context) string {
@@ -99,7 +105,6 @@ func extractUserInfo(c *gin.Context) (string, error) {
 	_, err := jwt.ParseWithClaims(tokenString, &claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
-	log.Println("student:", claims.StudentNumber)
 	return claims.StudentNumber, err
 }
 
@@ -110,20 +115,15 @@ func JWTAuthenticator() gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
 			return
 		}
-		log.Println("studentNumber:", studentNumber)
+		log.Println("user logged in studentNumber:", studentNumber)
 	}
 }
 
-func GetProfile(c *gin.Context) {
+func GetUserByToken(c *gin.Context) (models.User, error) {
 	studentNumber, err := extractUserInfo(c)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
-		return
+		return models.User{}, fmt.Errorf("unauthorized")
 	}
-	var user models.User
-	if err := DB.First(&user, "student_number = ?", studentNumber); err.Error != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "user specified by token not found"})
-		return
-	}
-	c.JSON(http.StatusOK, gin.H{"studentNumber": user.StudentNumber, "entranceYear": user.EntranceYear})
+	user, err := findUser(studentNumber)
+	return user, err
 }

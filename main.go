@@ -38,6 +38,7 @@ func main() {
 	profileRouter := r.Group("/profile")
 	profileRouter.Use(controllers.JWTAuthenticator())
 	profileRouter.GET("/", controllers.GetProfile)
+	profileRouter.PUT("/", controllers.UpdateProfile)
 
 	courseRouter := r.Group("/courses")
 	courseRouter.POST("/", controllers.CreateCourse)
