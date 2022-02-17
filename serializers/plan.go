@@ -22,13 +22,13 @@ func PlanToJSON(plan models.Plan) map[string]interface{} {
 	}
 }
 
-func GetPlanCourseGroups(courses []models.CourseGroup) []map[string]interface{} {
-	var courseGroups []map[string]interface{}
+func GetPlanCourseGroups(courses []models.CourseGroup) []int {
+	var courseGroups []int
 	for _, u := range courses {
-		courseGroups = append(courseGroups, CourseGroupToJSON(u))
+		courseGroups = append(courseGroups, int(u.ID))
 	}
 	if courseGroups == nil {
-		return []map[string]interface{}{}
+		return []int{}
 	}
 	return courseGroups
 }
