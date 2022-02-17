@@ -45,10 +45,6 @@ func GetTotalCredits(courses []models.CourseGroup) int {
 
 func CreatePlan(c *gin.Context) {
 	var plan models.Plan
-	if err := c.ShouldBindJSON(&plan); err != nil {
-		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
-		return
-	}
 	user, err := GetUserByToken(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
