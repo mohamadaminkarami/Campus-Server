@@ -36,7 +36,7 @@ func Singup(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "issue in token creation"})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"token": token, "message": "user created successfully"})
+	c.JSON(http.StatusOK, gin.H{"token": token, "message": "user created successfully"})
 }
 
 func findUser(studentNumber string) (models.User, error) {
