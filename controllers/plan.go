@@ -18,6 +18,7 @@ func PlanToJSON(plan models.Plan) map[string]interface{} {
 	return gin.H{
 		"id":      plan.ID,
 		"userId":  plan.UserId,
+		"totalCredits": GetTotalCredits(courses),
 		"courses": GetPlanCourseGroups(courses),
 	}
 }
@@ -31,6 +32,15 @@ func GetPlanCourseGroups(courses []models.CourseGroup) []map[string]interface{} 
 		return []map[string]interface{}{}
 	}
 	return courseGroups
+}
+
+func GetTotalCredits(courses []models.CourseGroup) int {
+	sum := 0
+	for _, courseGroup := range courses {
+		course, _ := GetCourseById(courseGroup.CourseId)
+		sum += course.Credit
+	}
+	return sum
 }
 
 func CreatePlan(c *gin.Context) {
