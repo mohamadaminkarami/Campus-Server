@@ -95,9 +95,9 @@ func GetPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	object := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 
-	if object.Error != nil {
+	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 	} else {
 		c.JSON(http.StatusOK, PlanToJSON(plan))
@@ -159,6 +159,29 @@ func DeleteCourseFromPlan(c *gin.Context) {
 	}
 
 	err = DB.Model(&plan).Association("Courses").Delete([]models.CourseGroup{courseGroup})
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, PlanToJSON(plan))
+}
+
+func ClearPlan(c *gin.Context) {
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	planId := c.Param("plan_id")
+	var plan models.Plan
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	if result.Error != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
+		return
+	}
+
+	err = DB.Model(&plan).Association("Courses").Clear()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

@@ -52,6 +52,7 @@ func main() {
 	planRouter.GET("/:plan_id", controllers.GetPlan)
 	planRouter.POST("/:plan_id/:course_id", controllers.AddCourseToPlan)
 	planRouter.DELETE("/:plan_id/:course_id", controllers.DeleteCourseFromPlan)
+	planRouter.DELETE("/:plan_id/all", controllers.ClearPlan)
 
 	err := r.Run()
 	if err != nil {
