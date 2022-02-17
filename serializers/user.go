@@ -10,5 +10,5 @@ func UserToJson(user models.User) map[string]interface{} {
 		"email":           user.Email,
 		"entranceYear":    user.EntranceYear,
 		"takeCoursesTime": user.TakeCoursesTime,
-		"SchoolId":        user.SchoolId}
+		"schoolId":        user.SchoolId}
 }
