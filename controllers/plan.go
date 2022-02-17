@@ -3,8 +3,12 @@ package controllers
 import (
 	"backend/models"
 	"fmt"
-	"github.com/gin-gonic/gin"
+	"log"
+	"math/rand"
 	"net/http"
+	"time"
+
+	"github.com/gin-gonic/gin"
 )
 
 func PlanToJSON(plan models.Plan) map[string]interface{} {
@@ -23,10 +27,45 @@ func PlanToJSON(plan models.Plan) map[string]interface{} {
 	}
 }
 
+func indexOf(element int, data []int) (int) {
+	for k, v := range data {
+		if element == v {
+			return k
+		}
+	}
+	return -1    //not found.
+}
+
+func CalcTakeChance(user models.User, courseGroup models.CourseGroup) (int) {
+	capacity := courseGroup.Capacity
+	var users []models.User
+	var selectedIds []int
+	DB.Order("take_courses_time").Find(&users)
+	for _, user := range users {
+		var plan models.Plan
+		DB.Where("user_id = ?", user.ID).First(&plan)
+		var courseGroups []models.CourseGroup
+		DB.Model(&plan).Association("Courses").Find(&courseGroups)
+		for _, dbCourseGroup := range courseGroups {
+			if dbCourseGroup.ID == courseGroup.ID {
+				selectedIds = append(selectedIds, int(user.ID))
+				break
+			}
+		}
+	}
+	index := indexOf(int(user.ID), selectedIds)
+	if (index - capacity) < 0 {
+		rand.Seed(time.Now().UnixNano())
+		return rand.Intn(50) + 50
+	}
+	log.Println(index, capacity, len(users)) 	
+	return int((float64(index - capacity) / float64(len(selectedIds) + 200 - capacity)) * 100)
+}
+
 func GetPlanCourseGroups(courses []models.CourseGroup) []map[string]interface{} {
 	var courseGroups []map[string]interface{}
-	for _, u := range courses {
-		courseGroups = append(courseGroups, CourseGroupToJSON(u))
+	for _, courseGroup := range courses {
+		courseGroups = append(courseGroups, CourseGroupToJSON(courseGroup))
 	}
 	if courseGroups == nil {
 		return []map[string]interface{}{}
@@ -102,6 +141,16 @@ func GetPlan(c *gin.Context) {
 	planId := c.Param("plan_id")
 	var plan models.Plan
 	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
+
+	log.Println("yo")
+	var courses []models.CourseGroup
+	err = DB.Preload("Schedule").Model(&plan).Association("Courses").Find(&courses)
+	if err != nil {
+		return
+	}
+	for _, course := range courses {
+		log.Println("hey", CalcTakeChance(user, course))
+	}
 
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
