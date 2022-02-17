@@ -1,6 +1,8 @@
 package models
 
 import (
+	"math/rand"
+	"strconv"
 	"time"
 
 	"gorm.io/gorm"
@@ -48,24 +50,23 @@ func InsertDummyData(DB gorm.DB) {
 	DB.Create(&schools)
 
 	// Users
-	users := []User{
-		{
+	users := []User{}
+	for i:=0; i <= 100; i++ {
+		rand.Seed(time.Now().UnixNano())
+		min := 1645112479 - 10000
+    	max := 1645112479 + 10000
+		stid := 98101200 + i;
+		user := User{
 			SchoolId:        getSchoolId(DB, "مهندسی کامپیوتر"),
 			Email:           "kambiz@gmail.com",
 			EntranceYear:    2001,
-			StudentNumber:   "98105000",
+			StudentNumber:   strconv.Itoa(stid),
 			Password:        "1234",
-			TakeCoursesTime: 1645080899,
-		},
-		{
-			SchoolId:        getSchoolId(DB, "مهندسی کامپیوتر"),
-			Email:           "dambiz@gmail.com",
-			EntranceYear:    2021,
-			StudentNumber:   "98106000",
-			Password:        "1234",
-			TakeCoursesTime: 1645080700,
-		},
+			TakeCoursesTime: rand.Intn(max - min) + min,
+		}
+		users = append(users, user)
 	}
+
 	DB.Create(&users)
 
 	// Professor
@@ -202,22 +203,21 @@ func InsertDummyData(DB gorm.DB) {
 	}
 	DB.Create(&schedules)
 
-	// Plan
-	plans := []Plan{
-		{UserId: 1}, {UserId: 1}, {UserId: 2},
+	// One plan is created for each user with AfterCreate
+	var dbUsers []User
+	DB.Find(&dbUsers)
+	for _, user := range dbUsers {
+		var plan Plan
+		DB.Where("user_id = ?", user.ID).First(&plan)
+		var selectedCourseGroups []CourseGroup
+		DB.Find(&selectedCourseGroups,
+			[]int{
+				getCourseGroupId(DB, getCourseId(DB, 40153), 1),
+				getCourseGroupId(DB, getCourseId(DB, 22015), 2), 
+				getCourseGroupId(DB, getCourseId(DB, 40244), 1),
+				getCourseGroupId(DB, getCourseId(DB, 40108), 2),
+				getCourseGroupId(DB, getCourseId(DB, 31119), 1),
+			})
+		DB.Model(&plan).Association("Courses").Append(&selectedCourseGroups)
 	}
-	DB.Create(&plans)
-
-	var plan Plan
-	DB.First(&plan, 1)
-	var selectedCourseGroups []CourseGroup
-	DB.Find(&selectedCourseGroups,
-		[]int{
-			getCourseGroupId(DB, getCourseId(DB, 40153), 1),
-			getCourseGroupId(DB, getCourseId(DB, 22015), 2), 
-			getCourseGroupId(DB, getCourseId(DB, 40244), 1),
-			getCourseGroupId(DB, getCourseId(DB, 40108), 2),
-			getCourseGroupId(DB, getCourseId(DB, 31119), 1),
-		})
-	DB.Model(&plan).Association("Courses").Append(&selectedCourseGroups)
 }
