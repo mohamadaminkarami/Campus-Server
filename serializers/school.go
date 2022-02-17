@@ -1,7 +1,6 @@
 package serializers
 
 import (
-	"backend/controllers"
 	"backend/models"
 	"github.com/gin-gonic/gin"
 )
@@ -12,12 +11,12 @@ func SchoolToJSON(school models.School) map[string]interface{} {
 
 func GetSchoolCourseGroups(school models.School) []map[string]interface{} {
 	var groups []models.CourseGroup
-	controllers.DB.Preload("Schedule").Find(&groups)
+	models.GetDB().Preload("Schedule").Find(&groups)
 
 	var courseGroups []map[string]interface{}
 	for _, u := range groups {
 		var course models.Course
-		controllers.DB.First(&course, u.CourseId)
+		models.GetDB().First(&course, u.CourseId)
 		if course.SchoolId == int(school.ID) {
 			courseGroups = append(courseGroups, CourseGroupToJSON(u))
 		}

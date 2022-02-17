@@ -1,7 +1,6 @@
 package serializers
 
 import (
-	"backend/controllers"
 	"backend/models"
 	"github.com/gin-gonic/gin"
 )
@@ -29,7 +28,7 @@ func ProfessorToJSON(professor models.Professor) map[string]interface{} {
 func CourseGroupToJSON(courseGroup models.CourseGroup) map[string]interface{} {
 	course, _ := GetCourseById(courseGroup.CourseId)
 	var professor models.Professor
-	controllers.DB.First(&professor, courseGroup.ProfessorId)
+	models.GetDB().First(&professor, courseGroup.ProfessorId)
 
 	return gin.H{
 		"id":          courseGroup.ID,

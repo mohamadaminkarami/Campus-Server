@@ -14,13 +14,13 @@ func CreateSchool(c *gin.Context) {
 		return
 	}
 
-	DB.Create(&School)
+	models.GetDB().Create(&School)
 	c.JSON(http.StatusOK, serializers.SchoolToJSON(School))
 }
 
 func GetAllSchoolCourses(c *gin.Context) {
 	var schools []models.School
-	DB.Find(&schools)
+	models.GetDB().Find(&schools)
 	var response []map[string]interface{}
 
 	for _, u := range schools {
@@ -31,7 +31,7 @@ func GetAllSchoolCourses(c *gin.Context) {
 
 func GetAllSchools(c *gin.Context) {
 	var schools []models.School
-	DB.Find(&schools)
+	models.GetDB().Find(&schools)
 	var response []map[string]interface{}
 
 	for _, u := range schools {
@@ -49,7 +49,7 @@ func UpdateSchool(c *gin.Context) {
 	}
 
 	schoolId := c.Param("id")
-	object := DB.First(&school, schoolId)
+	object := models.GetDB().First(&school, schoolId)
 
 	if object.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
@@ -64,12 +64,12 @@ func UpdateSchool(c *gin.Context) {
 func DeleteSchool(c *gin.Context) {
 	schoolId := c.Param("id")
 	var school models.School
-	object := DB.First(&school, schoolId)
+	object := models.GetDB().First(&school, schoolId)
 
 	if object.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
 	} else {
-		DB.Delete(&school, schoolId)
+		models.GetDB().Delete(&school, schoolId)
 		c.JSON(http.StatusOK, gin.H{"message": "Item deleted"})
 	}
 }

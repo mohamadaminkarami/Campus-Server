@@ -16,7 +16,7 @@ func CreatePlan(c *gin.Context) {
 	}
 
 	plan.UserId = int(user.ID)
-	DB.Create(&plan)
+	models.GetDB().Create(&plan)
 	c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 }
 
@@ -28,7 +28,7 @@ func GetAllPlans(c *gin.Context) {
 	}
 
 	var plans []models.Plan
-	DB.Where(&models.Plan{UserId: int(user.ID)}).Find(&plans)
+	models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).Find(&plans)
 	var response []map[string]interface{}
 
 	for _, u := range plans {
@@ -46,12 +46,12 @@ func DeletePlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
+	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
 	} else {
-		DB.Delete(&plan, planId)
+		models.GetDB().Delete(&plan, planId)
 		c.JSON(http.StatusOK, gin.H{"message": "Item deleted"})
 	}
 }
@@ -65,7 +65,7 @@ func GetPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
+	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
@@ -83,7 +83,7 @@ func AddCourseToPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
+	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
@@ -91,13 +91,13 @@ func AddCourseToPlan(c *gin.Context) {
 
 	courseGroupId := c.Param("course_id")
 	var courseGroup models.CourseGroup
-	result = DB.First(&courseGroup, courseGroupId)
+	result = models.GetDB().First(&courseGroup, courseGroupId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
 
-	err = DB.Model(&plan).Association("Courses").Append([]models.CourseGroup{courseGroup})
+	err = models.GetDB().Model(&plan).Association("Courses").Append([]models.CourseGroup{courseGroup})
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -114,7 +114,7 @@ func DeleteCourseFromPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
+	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
@@ -122,13 +122,13 @@ func DeleteCourseFromPlan(c *gin.Context) {
 
 	courseGroupId := c.Param("course_id")
 	var courseGroup models.CourseGroup
-	result = DB.First(&courseGroup, courseGroupId)
+	result = models.GetDB().First(&courseGroup, courseGroupId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
 
-	err = DB.Model(&plan).Association("Courses").Delete([]models.CourseGroup{courseGroup})
+	err = models.GetDB().Model(&plan).Association("Courses").Delete([]models.CourseGroup{courseGroup})
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -145,13 +145,13 @@ func ClearPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
+	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
 	}
 
-	err = DB.Model(&plan).Association("Courses").Clear()
+	err = models.GetDB().Model(&plan).Association("Courses").Clear()
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

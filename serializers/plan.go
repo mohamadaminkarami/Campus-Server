@@ -1,7 +1,6 @@
 package serializers
 
 import (
-	"backend/controllers"
 	"backend/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -9,7 +8,7 @@ import (
 
 func PlanToJSON(plan models.Plan) map[string]interface{} {
 	var courses []models.CourseGroup
-	err := controllers.DB.Preload("Schedule").Model(&plan).Association("Courses").Find(&courses)
+	err := models.GetDB().Preload("Schedule").Model(&plan).Association("Courses").Find(&courses)
 	if err != nil {
 		fmt.Println(err.Error())
 		return nil
@@ -45,7 +44,7 @@ func GetTotalCredits(courses []models.CourseGroup) int {
 
 func GetCourseById(courseId int) (models.Course, error) {
 	var course models.Course
-	result := controllers.DB.Preload("Prerequisites").Preload("Corequisites").First(&course, courseId)
+	result := models.GetDB().Preload("Prerequisites").Preload("Corequisites").First(&course, courseId)
 
 	if result.Error != nil {
 		return models.Course{}, result.Error

@@ -29,7 +29,7 @@ func Singup(c *gin.Context) {
 		Password:     data.Password,
 		EntranceYear: data.EntranceYear,
 		SchoolId:     data.SchoolId}
-	DB.Create(&user)
+	models.GetDB().Create(&user)
 	token, err := getToken(user.StudentNumber)
 	if err != nil {
 		log.Println("err", err)
@@ -41,7 +41,7 @@ func Singup(c *gin.Context) {
 
 func findUser(studentNumber string) (models.User, error) {
 	var user models.User
-	if err := DB.First(&user, "student_number = ?", studentNumber); err.Error != nil {
+	if err := models.GetDB().First(&user, "student_number = ?", studentNumber); err.Error != nil {
 		return models.User{}, err.Error
 	}
 	return user, nil

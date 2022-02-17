@@ -51,7 +51,7 @@ var DoesSchoolExist validator.Func = func(fl validator.FieldLevel) bool {
 	schoolId, ok := fl.Field().Interface().(int)
 	if ok {
 		var school models.School
-		if result := DB.First(&school, schoolId); result.Error != nil {
+		if result := models.GetDB().First(&school, schoolId); result.Error != nil {
 			return false
 		}
 		return true
