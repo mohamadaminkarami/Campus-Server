@@ -86,7 +86,7 @@ func Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "issue in token creation"})
 		return
 	}
-	c.JSON(http.StatusBadRequest, gin.H{"token": token, "message": "user logged in successfully"})
+	c.JSON(http.StatusOK, gin.H{"token": token, "message": "user logged in successfully"})
 }
 
 func extractToken(c *gin.Context) string {
