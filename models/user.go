@@ -20,7 +20,6 @@ type User struct {
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 	log.Println("before creating User...")
-	log.Println(u.TakeCoursesTime, u.Password, u.StudentNumber, u.Email)
 	if u.Password != "" {
 		hash, err := HashPassword(u.Password)
 		if err != nil {
@@ -28,6 +27,14 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 		}
 		tx.Statement.SetColumn("Password", hash)
 	}
+	return
+}
+
+func (u *User) AfterCreate(tx *gorm.DB) (err error) {
+	log.Println("after creating User...")
+	var plan Plan
+	plan.UserId = int(u.ID)
+	tx.Create(&plan)
 	return
 }
 
