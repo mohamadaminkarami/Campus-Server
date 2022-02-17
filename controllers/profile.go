@@ -79,9 +79,8 @@ func UpdateProfile(c *gin.Context) {
 		}
 		data.Password = hash
 	}
-	log.Println(data.TakeCoursesTime)
-	// stid := user.StudentNumber
-	// DB.Model(&user).Omit(getUpdateProfileOmitList(data)...).Updates(structs.Map(data))
-	// DB.First(&user, "student_number = ?", stid)
+	stid := user.StudentNumber
+	models.GetDB().Model(&user).Omit(getUpdateProfileOmitList(data)...).Updates(structs.Map(data))
+	models.GetDB().First(&user, "student_number = ?", stid)
 	c.JSON(http.StatusOK, serializers.UserToJson(user))
 }
