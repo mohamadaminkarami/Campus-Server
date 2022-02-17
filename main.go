@@ -41,10 +41,13 @@ func main() {
 	courseGroupRouter.Use(controllers.JWTAuthenticator())
 	courseGroupRouter.GET("/course-groups", controllers.GetAllSchoolCourses)
 
-	PlanRouter := r.Group("/plans")
-	PlanRouter.GET("/", controllers.GetAllPlans)
-	PlanRouter.POST("/", controllers.CreatePlan)
-	PlanRouter.DELETE("/:id", controllers.DeletePlan)
+	planRouter := r.Group("/plans")
+	planRouter.GET("/", controllers.GetAllPlans)
+	planRouter.POST("/", controllers.CreatePlan)
+	planRouter.DELETE("/:plan_id", controllers.DeletePlan)
+	planRouter.GET("/:plan_id", controllers.GetPlan)
+	planRouter.POST("/:plan_id/:course_id", controllers.AddCourseToPlan)
+	planRouter.DELETE("/:plan_id/:course_id", controllers.DeleteCourseFromPlan)
 
 	err := r.Run()
 	if err != nil {
