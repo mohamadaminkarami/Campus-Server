@@ -15,6 +15,9 @@ func main() {
 	log.Println("Going to initialize Database...")
 
 	DB := models.InitDB()
+	// uncomment below line to insert data in database
+	// database should be empty else this won't work properly (TODO)  
+	// models.InsertDummyData(DB)
 	controllers.DB = DB
 	r := gin.Default()
 
@@ -42,6 +45,7 @@ func main() {
 	courseGroupRouter.GET("/course-groups", controllers.GetAllSchoolCourses)
 
 	planRouter := r.Group("/plans")
+	planRouter.Use(controllers.JWTAuthenticator())
 	planRouter.GET("/", controllers.GetAllPlans)
 	planRouter.POST("/", controllers.CreatePlan)
 	planRouter.DELETE("/:plan_id", controllers.DeletePlan)
