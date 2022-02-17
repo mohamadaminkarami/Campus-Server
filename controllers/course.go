@@ -26,9 +26,18 @@ func ProfessorToJSON(professor models.Professor) map[string]interface{} {
 	}
 }
 
-func CourseGroupToJSON(courseGroup models.CourseGroup) map[string]interface{} {
+func GetCourseById(courseId int) (models.Course, error) {
 	var course models.Course
-	DB.Preload("Prerequisites").Preload("Corequisites").First(&course, courseGroup.CourseId)
+	result := DB.Preload("Prerequisites").Preload("Corequisites").First(&course, courseId)
+
+	if result.Error != nil {
+		return models.Course{}, result.Error
+	}
+	return course, nil
+}
+
+func CourseGroupToJSON(courseGroup models.CourseGroup) map[string]interface{} {
+	course, _ := GetCourseById(courseGroup.CourseId)
 	var professor models.Professor
 	DB.First(&professor, courseGroup.ProfessorId)
 
