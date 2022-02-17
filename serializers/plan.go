@@ -18,7 +18,7 @@ func PlanToJSON(plan models.Plan) map[string]interface{} {
 		"id":           plan.ID,
 		"userId":       plan.UserId,
 		"totalCredits": GetTotalCredits(courses),
-		"courses":      GetPlanCourseGroups(courses),
+		"courseGroups": GetPlanCourseGroups(courses),
 	}
 }
 
