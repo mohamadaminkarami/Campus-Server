@@ -4,9 +4,23 @@ import (
 	"backend/config"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"sync"
 )
 
-func InitDB() gorm.DB {
+var (
+	once     sync.Once
+	instance *gorm.DB
+)
+
+func GetDB() *gorm.DB {
+	once.Do(func() {
+		instance = initDB()
+	})
+
+	return instance
+}
+
+func initDB() *gorm.DB {
 	dsn := "host=" + config.Get("POSTGRES_HOST") +
 		" user=" + config.Get("POSTGRES_USER") +
 		" password=" + config.Get("POSTGRES_PASSWORD") +
@@ -22,5 +36,5 @@ func InitDB() gorm.DB {
 
 	// Migrate the schema
 	db.AutoMigrate(&User{}, &School{}, &Course{}, &Professor{}, &CourseGroup{}, &Schedule{}, &Plan{})
-	return *db
+	return db
 }

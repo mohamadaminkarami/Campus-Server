@@ -22,11 +22,11 @@ func main() {
 		v.RegisterValidation("doesSchoolExist", controllers.DoesSchoolExist)
 	}
 
-	DB := models.InitDB()
+	models.GetDB()
 	// uncomment below line to insert data in database
-	// database should be empty else this won't work properly 
-	// models.InsertDummyData(DB)
-	controllers.DB = DB
+	// database should be empty else this won't work properly
+	// DB := models.GetDB()
+	// models.InsertDummyData(*DB)
 	r := gin.Default()
 
 	conf := cors.DefaultConfig()
