@@ -2,46 +2,10 @@ package controllers
 
 import (
 	"backend/models"
-	"fmt"
+	"backend/serializers"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
-func PlanToJSON(plan models.Plan) map[string]interface{} {
-	var courses []models.CourseGroup
-	err := DB.Preload("Schedule").Model(&plan).Association("Courses").Find(&courses)
-	if err != nil {
-		fmt.Println(err.Error())
-		return nil
-	}
-
-	return gin.H{
-		"id":      plan.ID,
-		"userId":  plan.UserId,
-		"totalCredits": GetTotalCredits(courses),
-		"courses": GetPlanCourseGroups(courses),
-	}
-}
-
-func GetPlanCourseGroups(courses []models.CourseGroup) []map[string]interface{} {
-	var courseGroups []map[string]interface{}
-	for _, u := range courses {
-		courseGroups = append(courseGroups, CourseGroupToJSON(u))
-	}
-	if courseGroups == nil {
-		return []map[string]interface{}{}
-	}
-	return courseGroups
-}
-
-func GetTotalCredits(courses []models.CourseGroup) int {
-	sum := 0
-	for _, courseGroup := range courses {
-		course, _ := GetCourseById(courseGroup.CourseId)
-		sum += course.Credit
-	}
-	return sum
-}
 
 func CreatePlan(c *gin.Context) {
 	var plan models.Plan
@@ -53,7 +17,7 @@ func CreatePlan(c *gin.Context) {
 
 	plan.UserId = int(user.ID)
 	DB.Create(&plan)
-	c.JSON(http.StatusOK, PlanToJSON(plan))
+	c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 }
 
 func GetAllPlans(c *gin.Context) {
@@ -62,13 +26,13 @@ func GetAllPlans(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
-	
+
 	var plans []models.Plan
 	DB.Where(&models.Plan{UserId: int(user.ID)}).Find(&plans)
 	var response []map[string]interface{}
 
 	for _, u := range plans {
-		response = append(response, PlanToJSON(u))
+		response = append(response, serializers.PlanToJSON(u))
 	}
 	c.JSON(http.StatusOK, gin.H{"result": response})
 }
@@ -106,7 +70,7 @@ func GetPlan(c *gin.Context) {
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 	} else {
-		c.JSON(http.StatusOK, PlanToJSON(plan))
+		c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 	}
 }
 
@@ -119,7 +83,7 @@ func AddCourseToPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
@@ -138,7 +102,7 @@ func AddCourseToPlan(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, PlanToJSON(plan))
+	c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 }
 
 func DeleteCourseFromPlan(c *gin.Context) {
@@ -150,7 +114,7 @@ func DeleteCourseFromPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
@@ -169,7 +133,7 @@ func DeleteCourseFromPlan(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, PlanToJSON(plan))
+	c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 }
 
 func ClearPlan(c *gin.Context) {
@@ -181,7 +145,7 @@ func ClearPlan(c *gin.Context) {
 
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
@@ -192,5 +156,5 @@ func ClearPlan(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, PlanToJSON(plan))
+	c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 }

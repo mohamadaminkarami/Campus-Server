@@ -2,87 +2,10 @@ package controllers
 
 import (
 	"backend/models"
+	"backend/serializers"
 	"github.com/gin-gonic/gin"
 	"net/http"
 )
-
-func CourseToJSON(course models.Course) map[string]interface{} {
-	return gin.H{
-		"id":            course.ID,
-		"name":          course.Name,
-		"code":          course.Code,
-		"credit":        course.Credit,
-		"syllabus":      course.Syllabus,
-		"school":        course.SchoolId,
-		"prerequisites": RequisitesToJSON(course.Prerequisites),
-		"corequisites":  RequisitesToJSON(course.Corequisites),
-	}
-}
-
-func ProfessorToJSON(professor models.Professor) map[string]interface{} {
-	return gin.H{
-		"id":   professor.ID,
-		"name": professor.Name,
-	}
-}
-
-func GetCourseById(courseId int) (models.Course, error) {
-	var course models.Course
-	result := DB.Preload("Prerequisites").Preload("Corequisites").First(&course, courseId)
-
-	if result.Error != nil {
-		return models.Course{}, result.Error
-	}
-	return course, nil
-}
-
-func CourseGroupToJSON(courseGroup models.CourseGroup) map[string]interface{} {
-	course, _ := GetCourseById(courseGroup.CourseId)
-	var professor models.Professor
-	DB.First(&professor, courseGroup.ProfessorId)
-
-	return gin.H{
-		"id":          courseGroup.ID,
-		"professor":   ProfessorToJSON(professor),
-		"course":      CourseToJSON(course),
-		"groupNumber": courseGroup.GroupNumber,
-		"capacity":    courseGroup.Capacity,
-		"examDate":    courseGroup.ExamDate.Unix(),
-		"detail":      courseGroup.Detail,
-		"schedule":    SchedulesToJSON(courseGroup.Schedule),
-	}
-}
-
-func SchedulesToJSON(schedules []models.Schedule) []map[string]interface{} {
-	var response []map[string]interface{}
-	for _, schedule := range schedules {
-		response = append(response, gin.H{
-			"startTime": schedule.Start,
-			"endTime":   schedule.End,
-			"day":       schedule.Day,
-		})
-	}
-	if response == nil {
-		return []map[string]interface{}{}
-	}
-	return response
-}
-
-func RequisitesToJSON(courses []models.Course) []map[string]interface{} {
-	var response []map[string]interface{}
-	for _, course := range courses {
-		response = append(response, gin.H{
-			"id":     course.ID,
-			"name":   course.Name,
-			"code":   course.Code,
-			"credit": course.Credit,
-		})
-	}
-	if response == nil {
-		return []map[string]interface{}{}
-	}
-	return response
-}
 
 func CreateCourse(c *gin.Context) {
 	var course models.Course
@@ -98,7 +21,7 @@ func CreateCourse(c *gin.Context) {
 	}
 
 	DB.Create(&course)
-	c.JSON(http.StatusOK, CourseToJSON(course))
+	c.JSON(http.StatusOK, serializers.CourseToJSON(course))
 }
 
 func GetAllCourses(c *gin.Context) {
@@ -107,7 +30,7 @@ func GetAllCourses(c *gin.Context) {
 	var response []map[string]interface{}
 
 	for _, u := range courses {
-		response = append(response, CourseToJSON(u))
+		response = append(response, serializers.CourseToJSON(u))
 	}
 	c.JSON(http.StatusOK, response)
 }
@@ -165,7 +88,7 @@ func UpdateCourse(c *gin.Context) {
 			object.Update("SchoolId", newCourse.SchoolId)
 		}
 
-		c.JSON(http.StatusOK, CourseToJSON(course))
+		c.JSON(http.StatusOK, serializers.CourseToJSON(course))
 	}
 }
 
