@@ -16,7 +16,7 @@ func main() {
 
 	DB := models.InitDB()
 	// uncomment below line to insert data in database
-	// database should be empty else this won't work properly (TODO)  
+	// database should be empty else this won't work properly 
 	// models.InsertDummyData(DB)
 	controllers.DB = DB
 	r := gin.Default()

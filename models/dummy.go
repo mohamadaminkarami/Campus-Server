@@ -6,7 +6,25 @@ import (
 	"gorm.io/gorm"
 )
 
-func getCourseId(DB gorm.DB, code int) (int) {
+func getCourseGroupId(DB gorm.DB, courseId int, groupNumber int) int {
+	var courseGroup CourseGroup
+	DB.Where(&CourseGroup{CourseId: courseId, GroupNumber: groupNumber}).First(&courseGroup)
+	return int(courseGroup.ID)
+}
+
+func getProfessorId(DB gorm.DB, name string) int {
+	var professor Professor
+	DB.First(&professor, "name = ?", name)
+	return int(professor.ID)
+}
+
+func getSchoolId(DB gorm.DB, name string) int {
+	var school School
+	DB.First(&school, "name = ?", name)
+	return int(school.ID)
+}
+
+func getCourseId(DB gorm.DB, code int) int {
 	var course Course
 	DB.First(&course, "code = ?", code)
 	return int(course.ID)
@@ -15,23 +33,24 @@ func getCourseId(DB gorm.DB, code int) (int) {
 func InsertDummyData(DB gorm.DB) {
 	// School
 	schools := []School{
-		{Name: "مهندسی کامپیوتر"}, // 1
-		{Name: "مهندسی صنایع"}, // 2
-		{Name: "مهندسی برق"}, // 3
-		{Name: "مهندسی عمران"}, // 4
-		{Name: "مرکز معارف"}, // 5
-		{Name: "مرکز تربیت بدنی"}, //6
-		{Name: "ریاضی"}, // 7
-		{Name: "فیزیک"}, // 8
-		{Name: "کارگاه‌ها"}, // 9
+		{Name: "مهندسی کامپیوتر"},    // 1
+		{Name: "مهندسی صنایع"},       // 2
+		{Name: "مهندسی برق"},         // 3
+		{Name: "مهندسی عمران"},       // 4
+		{Name: "مرکز معارف"},         // 5
+		{Name: "مرکز تربیت بدنی"},    //6
+		{Name: "ریاضی"},              // 7
+		{Name: "فیزیک"},              // 8
+		{Name: "کارگاه‌ها"},          // 9
 		{Name: "مهندسی و علم مواد‍"}, // 10
+		{Name: "مرکز زبان‌ها"},       // 11
 	}
 	DB.Create(&schools)
 
 	// Users
 	users := []User{
 		{
-			SchoolId:        1,
+			SchoolId:        getSchoolId(DB, "مهندسی کامپیوتر"),
 			Email:           "kambiz@gmail.com",
 			EntranceYear:    2001,
 			StudentNumber:   "98105000",
@@ -39,7 +58,7 @@ func InsertDummyData(DB gorm.DB) {
 			TakeCoursesTime: 1645080899,
 		},
 		{
-			SchoolId:        1,
+			SchoolId:        getSchoolId(DB, "مهندسی کامپیوتر"),
 			Email:           "dambiz@gmail.com",
 			EntranceYear:    2021,
 			StudentNumber:   "98106000",
@@ -51,22 +70,27 @@ func InsertDummyData(DB gorm.DB) {
 
 	// Professor
 	professors := []Professor{
-		{Name: "امیرعلی چکاه"}, // 1
-		{Name: "استاد رئیسی"}, // 2
-		{Name: "استاد مقدسی"}, // 3
-		{Name: "علی شریفی زارچی"}, // 4
-		{Name: "علی عیسی زاده"}, // 5
-		{Name: "استاد جهانگیر"}, // 6
+		{Name: "امیرعلی چکاه"},     // 1
+		{Name: "استاد رئیسی"},      // 2
+		{Name: "استاد مقدسی"},      // 3
+		{Name: "علی شریفی زارچی"},  // 4
+		{Name: "مرتضی عیسی زاده"},  // 5
+		{Name: "استاد جهانگیر"},    // 6
+		{Name: "استاد جواهریان"},   // 7
+		{Name: "استاد ضرابی زاده"}, // 8
 	}
 	DB.Create(&professors)
 
 	// Course
 	courses := []Course{
-		{Code: 40153, Name: "مبانی برنامه سازی", Credit: 3, SchoolId: 1},
-		{Code: 40244, Name: "برنامه سازی پیشرفته", Credit: 3, SchoolId: 1},
-		{Code: 24011, Name: "فیزیک ۱", Credit: 3, SchoolId: 8},
-		{Code: 22015, Name: "ریاضی عمومی ۱", Credit: 4, SchoolId: 7},
-		{Code: 40115, Name: "ساختمان های گسسته", Credit: 3, SchoolId: 1},
+		{Code: 40153, Name: "مبانی برنامه سازی", Credit: 3, SchoolId: getSchoolId(DB, "مهندسی کامپیوتر")},
+		{Code: 40244, Name: "برنامه سازی پیشرفته", Credit: 3, SchoolId: getSchoolId(DB, "مهندسی کامپیوتر")},
+		{Code: 24011, Name: "فیزیک ۱", Credit: 3, SchoolId: getSchoolId(DB, "فیزیک")},
+		{Code: 22015, Name: "ریاضی عمومی ۱", Credit: 4, SchoolId: getSchoolId(DB, "ریاضی")},
+		{Code: 33018, Name: "کارگاه عمومی", Credit: 1, SchoolId: getSchoolId(DB, "کارگاه‌ها")},
+		{Code: 40108, Name: "کارگاه کامپیوتر", Credit: 1, SchoolId: getSchoolId(DB, "کارگاه‌ها")},
+		{Code: 31119, Name: "آشنایی با ادبیات فارسی", Credit: 3, SchoolId: getSchoolId(DB, "مرکز زبان‌ها")},
+		{Code: 40115, Name: "ساختمان های گسسته", Credit: 3, SchoolId: getSchoolId(DB, "مهندسی کامپیوتر")},
 	}
 	DB.Create(&courses)
 
@@ -79,63 +103,105 @@ func InsertDummyData(DB gorm.DB) {
 	// CourseGroup
 	courseGroups := []CourseGroup{
 		{ // 1
-			ProfessorId: 1,
-			CourseId: getCourseId(DB, 40153),
+			ProfessorId: getProfessorId(DB, "امیرعلی چکاه"),
+			CourseId:    getCourseId(DB, 40153),
 			GroupNumber: 1,
-			Capacity: 40,
-			ExamDate: time.Now().Add(24*64*time.Hour),
-			Detail: "حضوری برگزار می‌شود.",
+			Capacity:    40,
+			ExamDate:    time.Now().Add(24 * 64 * time.Hour),
+			Detail:      "حضوری برگزار می‌شود.",
 		},
 		{ // 2
-			ProfessorId: 2,
-			CourseId: getCourseId(DB, 40153),
+			ProfessorId: getProfessorId(DB, "استاد رئیسی"),
+			CourseId:    getCourseId(DB, 40153),
 			GroupNumber: 2,
-			Capacity: 40,
-			ExamDate: time.Now().Add(24*64*time.Hour),
-			Detail: "حضوری برگزار می‌شود.",
+			Capacity:    40,
+			ExamDate:    time.Now().Add(24 * 64 * time.Hour),
+			Detail:      "حضوری برگزار می‌شود.",
 		},
 		{ // 3
-			ProfessorId: 3,
-			CourseId: getCourseId(DB, 22015),
+			ProfessorId: getProfessorId(DB, "استاد مقدسی"),
+			CourseId:    getCourseId(DB, 22015),
 			GroupNumber: 1,
-			Capacity: 100,
-			ExamDate: time.Now().Add(24*60*time.Hour),
-			Detail: "حضوری برگزار می‌شود.",
+			Capacity:    100,
+			ExamDate:    time.Now().Add(24 * 60 * time.Hour),
+			Detail:      "حضوری برگزار می‌شود.",
 		},
 		{ // 4
-			ProfessorId: 3,
-			CourseId: getCourseId(DB, 22015),
+			ProfessorId: getProfessorId(DB, "استاد مقدسی"),
+			CourseId:    getCourseId(DB, 22015),
 			GroupNumber: 2,
-			Capacity: 100,
-			ExamDate: time.Now().Add(24*60*time.Hour),
-			Detail: "حضوری برگزار می‌شود.",
+			Capacity:    100,
+			ExamDate:    time.Now().Add(24 * 60 * time.Hour),
+			Detail:      "حضوری برگزار می‌شود.",
 		},
 		{ // 5
-			ProfessorId: 5,
-			CourseId: getCourseId(DB, 40244),
+			ProfessorId: getProfessorId(DB, "مرتضی عیسی زاده"),
+			CourseId:    getCourseId(DB, 40244),
 			GroupNumber: 1,
-			Capacity: 50,
-			ExamDate: time.Now().Add(24*62*time.Hour),
-			Detail: "مجازی برگزار می‌شود.",
+			Capacity:    50,
+			ExamDate:    time.Now().Add(24 * 62 * time.Hour),
+			Detail:      "مجازی برگزار می‌شود.",
+		},
+		{ // 6
+			ProfessorId: getProfessorId(DB, "استاد ضرابی زاده"),
+			CourseId:    getCourseId(DB, 40108),
+			GroupNumber: 1,
+			Capacity:    20,
+			ExamDate:    time.Now().Add(24 * 58 * time.Hour),
+			Detail:      "مجازی برگزار می‌شود.",
+		},
+		{ // 7
+			ProfessorId: getProfessorId(DB, "استاد ضرابی زاده"),
+			CourseId:    getCourseId(DB, 40108),
+			GroupNumber: 2,
+			Capacity:    25,
+			ExamDate:    time.Now().Add(24 * 58 * time.Hour),
+			Detail:      "مجازی برگزار می‌شود.",
+		},
+		{ // 8
+			ProfessorId: getProfessorId(DB, "استاد جواهریان"),
+			CourseId:    getCourseId(DB, 31119),
+			GroupNumber: 1,
+			Capacity:    35,
+			ExamDate:    time.Now().Add(24 * 69 * time.Hour),
+			Detail:      "مجازی برگزار می‌شود.",
 		},
 	}
 	DB.Create(&courseGroups)
 
 	// Schedule
 	schedules := []Schedule{
-		{Start: 7.5, End: 9, Day: 0, CourseGroupId: 1},
-		{Start: 7.5, End: 9, Day: 2, CourseGroupId: 1},
-		{Start: 7.5, End: 9, Day: 0, CourseGroupId: 2},
-		{Start: 7.5, End: 9, Day: 2, CourseGroupId: 2},
-		{Start: 10.5, End: 12, Day: 1, CourseGroupId: 3},
-		{Start: 10.5, End: 12, Day: 3, CourseGroupId: 3},
-		{Start: 10.5, End: 12, Day: 1, CourseGroupId: 4},
-		{Start: 10.5, End: 12, Day: 3, CourseGroupId: 4},
-		{Start: 16.5, End: 18, Day: 1, CourseGroupId: 5},
-		{Start: 16.5, End: 18, Day: 3, CourseGroupId: 5},
+		{Start: 7.5, End: 9, Day: 0,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40153), 1)},
+		{Start: 7.5, End: 9, Day: 2,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40153), 1)},
+		{Start: 7.5, End: 9, Day: 0,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40153), 2)},
+		{Start: 7.5, End: 9, Day: 2,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40153), 2)},
+		{Start: 10, End: 12, Day: 1,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 22015), 1)},
+		{Start: 10, End: 12, Day: 3,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 22015), 1)},
+		{Start: 10, End: 12, Day: 0,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 22015), 2)},
+		{Start: 10, End: 12, Day: 2,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 22015), 2)},
+		{Start: 16.5, End: 18, Day: 1,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40244), 1)},
+		{Start: 16.5, End: 18, Day: 3,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40244), 1)},
+		{Start: 9, End: 12, Day: 4,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40108), 1)},
+		{Start: 13, End: 16, Day: 4,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 40108), 2)},
+		{Start: 15, End: 16.30, Day: 0,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 31119), 1)},
+		{Start: 15, End: 16.30, Day: 2,
+			CourseGroupId: getCourseGroupId(DB, getCourseId(DB, 31119), 1)},
 	}
 	DB.Create(&schedules)
-	
+
 	// Plan
 	plans := []Plan{
 		{UserId: 1}, {UserId: 1}, {UserId: 2},
@@ -145,6 +211,13 @@ func InsertDummyData(DB gorm.DB) {
 	var plan Plan
 	DB.First(&plan, 1)
 	var selectedCourseGroups []CourseGroup
-	DB.Find(&selectedCourseGroups, []int{1, 3 , 5})
+	DB.Find(&selectedCourseGroups,
+		[]int{
+			getCourseGroupId(DB, getCourseId(DB, 40153), 1),
+			getCourseGroupId(DB, getCourseId(DB, 22015), 2), 
+			getCourseGroupId(DB, getCourseId(DB, 40244), 1),
+			getCourseGroupId(DB, getCourseId(DB, 40108), 2),
+			getCourseGroupId(DB, getCourseId(DB, 31119), 1),
+		})
 	DB.Model(&plan).Association("Courses").Append(&selectedCourseGroups)
 }
