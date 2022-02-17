@@ -2,6 +2,8 @@ package serializers
 
 import (
 	"backend/models"
+	"math/rand"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,10 +27,47 @@ func ProfessorToJSON(professor models.Professor) map[string]interface{} {
 	}
 }
 
-func CourseGroupToJSON(courseGroup models.CourseGroup) map[string]interface{} {
+func indexOf(element int, data []int) (int) {
+	for k, v := range data {
+		if element == v {
+			return k
+		}
+	}
+	return -1 
+ }
+
+func CalcTakeChance( courseGroup models.CourseGroup, user models.User) (int) {
+	/*
+	capacity := courseGroup.Capacity
+	var users []models.User
+	var selectedIds []int
+	models.GetDB().Where("take_courses_time > 0").Order("take_courses_time").Find(&users)
+	for _, user := range users {
+	  var plan models.Plan
+	  models.GetDB().Where("user_id = ?", user.ID).First(&plan)
+	  var courseGroups []models.CourseGroup
+	  models.GetDB().Model(&plan).Association("Courses").Find(&courseGroups)
+	  for _, dbCourseGroup := range courseGroups {
+		if dbCourseGroup.ID == courseGroup.ID {
+		  selectedIds = append(selectedIds, int(user.ID))
+		  break
+		}
+	  }
+	}
+	index := indexOf(int(user.ID), selectedIds)
+	if (index - capacity) <= 0 {
+	  rand.Seed(time.Now().UnixNano())
+	  return rand.Intn(50) + 50
+	}
+	log.Println(courseGroup.CourseId, index, capacity, len(selectedIds))  
+	return int((1.05 - float64(index - capacity) / float64(len(selectedIds) - capacity) ) * 100)
+	*/
+	return rand.Intn(50)
+}
+
+func CourseGroupToJSON(courseGroup models.CourseGroup, user models.User) map[string]interface{} {
 	course, _ := GetCourseById(courseGroup.CourseId)
-	var professor models.Professor
-	models.GetDB().First(&professor, courseGroup.ProfessorId)
+	professor, _ := GetProfessorById(courseGroup.ProfessorId)
 
 	return gin.H{
 		"id":          courseGroup.ID,
@@ -39,6 +78,7 @@ func CourseGroupToJSON(courseGroup models.CourseGroup) map[string]interface{} {
 		"examDate":    courseGroup.ExamDate.Unix(),
 		"detail":      courseGroup.Detail,
 		"schedule":    SchedulesToJSON(courseGroup.Schedule),
+		"takeChance":  CalcTakeChance(courseGroup, user),
 	}
 }
 

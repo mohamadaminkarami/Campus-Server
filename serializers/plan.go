@@ -51,3 +51,13 @@ func GetCourseById(courseId int) (models.Course, error) {
 	}
 	return course, nil
 }
+
+func GetProfessorById(professorId int) (models.Professor, error) {
+	var professor models.Professor
+	result := models.GetDB().First(&professor, professorId)
+
+	if result.Error != nil {
+		return models.Professor{}, result.Error
+	}
+	return professor, nil
+}

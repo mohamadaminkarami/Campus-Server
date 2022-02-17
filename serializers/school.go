@@ -9,16 +9,16 @@ func SchoolToJSON(school models.School) map[string]interface{} {
 	return gin.H{"id": school.ID, "name": school.Name}
 }
 
-func GetSchoolCourseGroups(school models.School) []map[string]interface{} {
-	var groups []models.CourseGroup
-	models.GetDB().Preload("Schedule").Find(&groups)
+func GetSchoolCourseGroups(school models.School, user models.User) []map[string]interface{} {
+	var dbCourseGroups []models.CourseGroup
+	models.GetDB().Preload("Schedule").Find(&dbCourseGroups)
 
 	var courseGroups []map[string]interface{}
-	for _, u := range groups {
+	for _, dbCourseGroup := range dbCourseGroups {
 		var course models.Course
-		models.GetDB().First(&course, u.CourseId)
+		models.GetDB().First(&course, dbCourseGroup.CourseId)
 		if course.SchoolId == int(school.ID) {
-			courseGroups = append(courseGroups, CourseGroupToJSON(u))
+			courseGroups = append(courseGroups, CourseGroupToJSON(dbCourseGroup, user))
 		}
 	}
 	if courseGroups == nil {
@@ -27,10 +27,10 @@ func GetSchoolCourseGroups(school models.School) []map[string]interface{} {
 	return courseGroups
 }
 
-func SchoolCoursesToJSON(school models.School) map[string]interface{} {
+func SchoolCoursesToJSON(school models.School, user models.User) map[string]interface{} {
 	return gin.H{
 		"schoolId":     school.ID,
 		"schoolName":   school.Name,
-		"courseGroups": GetSchoolCourseGroups(school),
+		"courseGroups": GetSchoolCourseGroups(school, user),
 	}
 }
