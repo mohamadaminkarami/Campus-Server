@@ -8,11 +8,19 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 func main() {
 	config.Init()
 	log.Println("Going to initialize Database...")
+
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		log.Println("Going to register validator...")
+		v.RegisterValidation("isTimestamp", controllers.IsTimestamp)
+		v.RegisterValidation("doesSchoolExist", controllers.DoesSchoolExist)
+	}
 
 	DB := models.InitDB()
 	// uncomment below line to insert data in database
