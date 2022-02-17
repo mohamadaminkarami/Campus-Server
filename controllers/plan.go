@@ -39,15 +39,26 @@ func CreatePlan(c *gin.Context) {
 		c.JSON(http.StatusUnprocessableEntity, gin.H{"error": err.Error()})
 		return
 	}
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
 
-	// TODO: Set userId
+	plan.UserId = int(user.ID)
 	DB.Create(&plan)
 	c.JSON(http.StatusOK, PlanToJSON(plan))
 }
 
 func GetAllPlans(c *gin.Context) {
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+	
 	var plans []models.Plan
-	DB.Find(&plans) // TODO: Filter by User
+	DB.Where(&models.Plan{UserId: int(user.ID)}).Find(&plans)
 	var response []map[string]interface{}
 
 	for _, u := range plans {
@@ -57,11 +68,17 @@ func GetAllPlans(c *gin.Context) {
 }
 
 func DeletePlan(c *gin.Context) {
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	object := DB.First(&plan, planId) // TODO: Filter By User
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 
-	if object.Error != nil {
+	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
 	} else {
 		DB.Delete(&plan, planId)
@@ -70,9 +87,15 @@ func DeletePlan(c *gin.Context) {
 }
 
 func GetPlan(c *gin.Context) {
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	object := DB.First(&plan, planId) // TODO: Filter By User
+	object := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
 
 	if object.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
@@ -82,23 +105,29 @@ func GetPlan(c *gin.Context) {
 }
 
 func AddCourseToPlan(c *gin.Context) {
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	object := DB.First(&plan, planId) // TODO: Filter By User
-	if object.Error != nil {
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
 	}
 
-	courseId := c.Param("course_id")
-	var course models.CourseGroup
-	object = DB.First(&course, courseId)
-	if object.Error != nil {
+	courseGroupId := c.Param("course_id")
+	var courseGroup models.CourseGroup
+	result = DB.First(&courseGroup, courseGroupId)
+	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
 
-	err := DB.Model(&plan).Association("Courses").Append([]models.CourseGroup{course})
+	err = DB.Model(&plan).Association("Courses").Append([]models.CourseGroup{courseGroup})
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return
@@ -107,23 +136,29 @@ func AddCourseToPlan(c *gin.Context) {
 }
 
 func DeleteCourseFromPlan(c *gin.Context) {
+	user, err := GetUserByToken(c)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
 	planId := c.Param("plan_id")
 	var plan models.Plan
-	object := DB.First(&plan, planId) // TODO: Filter By User
-	if object.Error != nil {
+	result := DB.Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId) // TODO: Filter By User
+	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
 		return
 	}
 
-	courseId := c.Param("course_id")
-	var course models.CourseGroup
-	object = DB.First(&course, courseId)
-	if object.Error != nil {
+	courseGroupId := c.Param("course_id")
+	var courseGroup models.CourseGroup
+	result = DB.First(&courseGroup, courseGroupId)
+	if result.Error != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
 		return
 	}
 
-	err := DB.Model(&plan).Association("Courses").Delete([]models.CourseGroup{course})
+	err = DB.Model(&plan).Association("Courses").Delete([]models.CourseGroup{courseGroup})
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 		return

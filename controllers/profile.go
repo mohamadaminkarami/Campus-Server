@@ -21,6 +21,7 @@ func GetProfile(c *gin.Context) {
 	user, err := GetUserByToken(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	c.JSON(http.StatusOK, UserToJson(user))
 }
@@ -39,6 +40,7 @@ func UpdateProfile(c *gin.Context) {
 	user, err := GetUserByToken(c)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
 	}
 	var data forms.UpdateUserData
 	if err := c.ShouldBindJSON(&data); err != nil {
