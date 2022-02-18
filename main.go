@@ -4,6 +4,7 @@ import (
 	"backend/config"
 	"backend/controllers"
 	"backend/models"
+	"flag"
 	"log"
 
 	"github.com/gin-contrib/cors"
@@ -14,19 +15,31 @@ import (
 
 func main() {
 	config.Init()
-	log.Println("Going to initialize Database...")
+	log.Println("Starting up...")
 
+	// Initialize Validators
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
 		log.Println("Going to register validator...")
 		v.RegisterValidation("isTimestamp", controllers.IsTimestamp)
 		v.RegisterValidation("doesSchoolExist", controllers.DoesSchoolExist)
 	}
 
+	// Initialize DB
 	models.GetDB()
-	// uncomment below line to insert data in database
-	// database should be empty else this won't work properly
-	// DB := models.GetDB()
-	// models.InsertDummyData(*DB)
+	log.Println("Database Initialized...")
+
+	// Dummy data
+	createDummy := flag.Bool("dummy", false, "insert dummy data. Default is false")
+	var users_count int
+	flag.IntVar(&users_count, "u", 5, "Specify number of users. Default is 5")
+	flag.Parse()
+	if *createDummy {
+		models.InsertDummyData(users_count)	
+		log.Println("Dummy data inserted...")
+		// use "go run ." to skip and "go run . -dummy -u Int" to create dummy data
+	}
+	
+	// Routes
 	r := gin.Default()
 
 	conf := cors.DefaultConfig()
