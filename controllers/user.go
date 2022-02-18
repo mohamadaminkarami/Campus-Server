@@ -21,7 +21,7 @@ type Claims struct {
 func Singup(c *gin.Context) {
 	var data forms.SignupUserData
 	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	user := models.User{StudentNumber: data.StudentNumber,
@@ -31,14 +31,14 @@ func Singup(c *gin.Context) {
 		SchoolId:     data.SchoolId}
 	
 	if result := models.GetDB().Create(&user); result.Error != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
 		return 
 	}
 
 	token, err := getToken(user.StudentNumber)
 	if err != nil {
 		log.Println("err", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "issue in token creation"})
+		c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"error": "issue in token creation"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token, "message": "user created successfully"})
@@ -73,22 +73,22 @@ func getToken(studentNumber string) (string, error) {
 func Login(c *gin.Context) {
 	var data forms.LoginUserData
 	if err := c.ShouldBindJSON(&data); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	user, err := findUser(data.StudentNumber)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 	if !models.CheckPasswordHash(data.Password, user.Password) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "wrong password provided"})
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "wrong password provided"})
 		return
 	}
 	token, err := getToken(user.StudentNumber)
 	if err != nil {
 		log.Println("err", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "issue in token creation"})
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "issue in token creation"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"token": token, "message": "user logged in successfully"})
@@ -117,7 +117,7 @@ func JWTAuthenticator() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		studentNumber, err := extractUserInfo(c)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "unauthorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 		log.Println("user logged in studentNumber:", studentNumber)
