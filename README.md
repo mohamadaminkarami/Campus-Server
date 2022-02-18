@@ -15,5 +15,4 @@ how to run
 go mod init backend
 go mod tidy -compat=1.17
 go run . 
-### number after -u is number of dummy users created
 ```
