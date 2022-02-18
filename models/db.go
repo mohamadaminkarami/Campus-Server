@@ -38,3 +38,11 @@ func initDB() *gorm.DB {
 	db.AutoMigrate(&User{}, &School{}, &Course{}, &Professor{}, &CourseGroup{}, &Schedule{}, &Plan{})
 	return db
 }
+
+func IsDBEmpty() bool {
+	var user User
+	if result := GetDB().First(&user); result.Error != nil {
+		return true
+	}
+	return false	
+}

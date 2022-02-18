@@ -4,7 +4,6 @@ import (
 	"backend/config"
 	"backend/controllers"
 	"backend/models"
-	"flag"
 	"log"
 
 	"github.com/gin-contrib/cors"
@@ -29,16 +28,10 @@ func main() {
 	log.Println("Initialized Database...")
 
 	// Dummy data
-	createDummy := flag.Bool("dummy", false, "insert dummy data. Default is false")
-	var users_count int
-	flag.IntVar(&users_count, "u", 5, "Specify number of users. Default is 5")
-	flag.Parse()
-	if *createDummy {
-		models.InsertDummyData(users_count)	
+	if models.IsDBEmpty() {
+		models.InsertDummyData(5)	
 		log.Println("Dummy data inserted...")
-		// use "go run ." to skip and "go run . -dummy -u Int" to create dummy data
 	}
-	
 	// Routes
 	r := gin.Default()
 
