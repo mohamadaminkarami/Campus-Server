@@ -59,7 +59,7 @@ func InsertDummyData(users_count int) {
 		user := User{
 			SchoolId:        getSchoolId(DB, "مهندسی کامپیوتر"),
 			Email:           "kambiz@gmail.com",
-			EntranceYear:    rand.Intn(10) + 1390,
+			EntranceYear:    rand.Intn(10) + 2000,
 			StudentNumber:   strconv.Itoa(stid),
 			Password:        "1234",
 			TakeCoursesTime: times[rand.Intn(len(times))],
