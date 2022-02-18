@@ -49,10 +49,10 @@ func DeletePlan(c *gin.Context) {
 	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Item not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "plan not found"})
 	} else {
 		models.GetDB().Delete(&plan, planId)
-		c.JSON(http.StatusOK, gin.H{"message": "Item deleted"})
+		c.JSON(http.StatusOK, gin.H{"message": "plan deleted"})
 	}
 }
 
@@ -68,7 +68,7 @@ func GetPlan(c *gin.Context) {
 	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "plan not found"})
 	} else {
 		c.JSON(http.StatusOK, serializers.PlanToJSON(plan))
 	}
@@ -85,7 +85,7 @@ func AddCourseToPlan(c *gin.Context) {
 	var plan models.Plan
 	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "plan not found"})
 		return
 	}
 
@@ -93,7 +93,7 @@ func AddCourseToPlan(c *gin.Context) {
 	var courseGroup models.CourseGroup
 	result = models.GetDB().First(&courseGroup, courseGroupId)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "courseGroup not found"})
 		return
 	}
 
@@ -124,7 +124,7 @@ func DeleteCourseFromPlan(c *gin.Context) {
 	var courseGroup models.CourseGroup
 	result = models.GetDB().First(&courseGroup, courseGroupId)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Course not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "CourseGroup not found"})
 		return
 	}
 
@@ -147,7 +147,7 @@ func ClearPlan(c *gin.Context) {
 	var plan models.Plan
 	result := models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).First(&plan, planId)
 	if result.Error != nil {
-		c.JSON(http.StatusNotFound, gin.H{"error": "Plan not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "plan not found"})
 		return
 	}
 
