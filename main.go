@@ -19,14 +19,14 @@ func main() {
 
 	// Initialize Validators
 	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
-		log.Println("Going to register validator...")
 		v.RegisterValidation("isTimestamp", controllers.IsTimestamp)
 		v.RegisterValidation("doesSchoolExist", controllers.DoesSchoolExist)
+		log.Println("Registered validators...")
 	}
 
 	// Initialize DB
 	models.GetDB()
-	log.Println("Database Initialized...")
+	log.Println("Initialized Database...")
 
 	// Dummy data
 	createDummy := flag.Bool("dummy", false, "insert dummy data. Default is false")
@@ -42,6 +42,7 @@ func main() {
 	// Routes
 	r := gin.Default()
 
+	// CORS
 	conf := cors.DefaultConfig()
 	conf.AllowCredentials = true
 	conf.AllowAllOrigins = true

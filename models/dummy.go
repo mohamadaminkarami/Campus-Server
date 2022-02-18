@@ -213,8 +213,8 @@ func InsertDummyData(users_count int) {
 		rand.Seed(time.Now().UnixNano())
 		DB.Find(&selectedCourseGroups,
 			[]int{
-				getCourseGroupId(DB, getCourseId(DB, 40153), rand.Intn(2)),
-				getCourseGroupId(DB, getCourseId(DB, 22015), rand.Intn(2)),
+				getCourseGroupId(DB, getCourseId(DB, 40153), rand.Intn(2)+1),
+				getCourseGroupId(DB, getCourseId(DB, 22015), rand.Intn(2)+1),
 				getCourseGroupId(DB, getCourseId(DB, 40244), 1),
 				getCourseGroupId(DB, getCourseId(DB, 40108), 2),
 				getCourseGroupId(DB, getCourseId(DB, 31119), 1),

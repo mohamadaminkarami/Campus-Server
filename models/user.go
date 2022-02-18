@@ -1,8 +1,6 @@
 package models
 
 import (
-	"log"
-
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -19,7 +17,6 @@ type User struct {
 }
 
 func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
-	log.Println("before creating User...")
 	if u.Password != "" {
 		hash, err := HashPassword(u.Password)
 		if err != nil {
@@ -31,7 +28,6 @@ func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
 }
 
 func (u *User) AfterCreate(tx *gorm.DB) (err error) {
-	log.Println("after creating User...")
 	var plan Plan
 	plan.UserId = int(u.ID)
 	tx.Create(&plan)
