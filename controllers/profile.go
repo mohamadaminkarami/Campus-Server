@@ -4,7 +4,6 @@ import (
 	"backend/forms"
 	"backend/models"
 	"backend/serializers"
-	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -65,12 +64,13 @@ func UpdateProfile(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
+
 	var data forms.UpdateUserData
 	if err := c.ShouldBindJSON(&data); err != nil {
-		log.Println("1 ", data.TakeCoursesTime)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
 	if data.Password != "" {
 		hash, err := models.HashPassword(data.Password)
 		if err != nil {
@@ -79,6 +79,7 @@ func UpdateProfile(c *gin.Context) {
 		}
 		data.Password = hash
 	}
+
 	stid := user.StudentNumber
 	models.GetDB().Model(&user).Omit(getUpdateProfileOmitList(data)...).Updates(structs.Map(data))
 	models.GetDB().First(&user, "student_number = ?", stid)
