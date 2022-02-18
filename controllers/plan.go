@@ -28,7 +28,7 @@ func GetAllPlans(c *gin.Context) {
 	}
 
 	var plans []models.Plan
-	models.GetDB().Where(&models.Plan{UserId: int(user.ID)}).Find(&plans)
+	models.GetDB().Order("id").Where(&models.Plan{UserId: int(user.ID)}).Find(&plans)
 	var response []map[string]interface{}
 
 	for _, u := range plans {
