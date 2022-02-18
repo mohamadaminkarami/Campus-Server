@@ -2,9 +2,11 @@ package models
 
 import (
 	"backend/config"
+	"log"
+	"sync"
+
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"sync"
 )
 
 var (
@@ -28,7 +30,7 @@ func initDB() *gorm.DB {
 		" port=" + config.Get("POSTGRES_PORT") +
 		" sslmode=" + config.Get("POSTGRES_SSL_MODE") +
 		" TimeZone=" + config.Get("POSTGRES_TIMEZONE")
-
+	log.Println("DB conn: ", dsn)
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
