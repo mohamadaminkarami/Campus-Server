@@ -29,7 +29,12 @@ func Singup(c *gin.Context) {
 		Password:     data.Password,
 		EntranceYear: data.EntranceYear,
 		SchoolId:     data.SchoolId}
-	models.GetDB().Create(&user)
+	
+	if result := models.GetDB().Create(&user); result.Error != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": result.Error.Error()})
+		return 
+	}
+
 	token, err := getToken(user.StudentNumber)
 	if err != nil {
 		log.Println("err", err)
